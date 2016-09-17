@@ -4,3 +4,5 @@ default.elf
 *.nds
 *.cia
 *.bin
+*.dldi
+*.elf
