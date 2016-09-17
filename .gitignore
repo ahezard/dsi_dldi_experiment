@@ -1,0 +1,6 @@
+build
+default.elf
+
+*.nds
+*.cia
+*.bin
