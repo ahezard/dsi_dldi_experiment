@@ -46,7 +46,7 @@ void sendMsg(int size, u8* msg) {
 	*((vu32*)0x027FEE24) = (u32)0x027FEE05;
 	*((vu32*)0x027FEE28) = size;
 	for(int i=0;i<size;i++)  {
-		*((u8*)0x027FEE32+i) = msg[i];
+		*((u8*)0x027FEE2C+i) = msg[i];
 	}	
 }
 
@@ -106,7 +106,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 
-//	DC_FlushRange(buffer,numSectors * 512);
+	DC_FlushRange(buffer,numSectors * 512);
 
 	msg.type = SDMMC_SD_READ_SECTORS;
 	msg.sdParams.startsector = sector;

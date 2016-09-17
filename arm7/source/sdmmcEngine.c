@@ -28,7 +28,7 @@ void sendValue32(u32 value32) {
 
 void getDatamsg(int size, u8* msg) {
 	for(int i=0;i<size;i++)  {
-		msg[i]=*((u8*)0x027FEE32+i);
+		msg[i]=*((u8*)0x027FEE2C+i);
 	}	
 }
 
@@ -81,6 +81,7 @@ void sdmmcCustomMsgHandler(int bytes) {
 //---------------------------------------------------------------------------------
     FifoMessage msg;
     int retval = 0;
+	char buf[64];
 	
 	struct mmcdevice deviceSD =*getMMCDevice(1);
 
@@ -90,9 +91,15 @@ void sdmmcCustomMsgHandler(int bytes) {
     switch (msg.type) {
 
     case SDMMC_SD_READ_SECTORS:
+		nocashMessage("msg SDMMC_SD_READ_SECTORS received");
+		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+		nocashMessage(buf);
         retval = sdmmc_readsectors(&deviceSD, msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     case SDMMC_SD_WRITE_SECTORS:
+		nocashMessage("msg SDMMC_SD_WRITE_SECTORS received");
+		siprintf(buf, "%X-%X-%X", msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+		nocashMessage(buf);
         retval = sdmmc_writesectors(&deviceSD, msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
         break;
     }
