@@ -18,10 +18,18 @@
 
 #include <nds.h>
 #include <nds/arm7/sdmmc.h>
+#include <nds/fifomessages.h>
 
 void sendValue32(u32 value32) {
+	nocashMessage("sendValue32");
 	*((vu32*)0x027FEE24) = (u32)0x027FEE08;
 	*((vu32*)0x027FEE28) = value32;
+}
+
+void getDatamsg(int size, u8* msg) {
+	for(int i=0;i<size;i++)  {
+		msg[i]=*((u8*)0x027FEE32+i);
+	}	
 }
 
 //---------------------------------------------------------------------------------
@@ -68,12 +76,42 @@ void sdmmcCustomValueHandler(u32 value) {
     sendValue32(result);
 }
 
+//---------------------------------------------------------------------------------
+void sdmmcCustomMsgHandler(int bytes) {
+//---------------------------------------------------------------------------------
+    FifoMessage msg;
+    int retval = 0;
+	
+	struct mmcdevice deviceSD =*getMMCDevice(1);
+
+    getDatamsg(bytes, (u8*)&msg);
+
+    int oldIME = enterCriticalSection();
+    switch (msg.type) {
+
+    case SDMMC_SD_READ_SECTORS:
+        retval = sdmmc_readsectors(&deviceSD, msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        break;
+    case SDMMC_SD_WRITE_SECTORS:
+        retval = sdmmc_writesectors(&deviceSD, msg.sdParams.startsector, msg.sdParams.numsectors, msg.sdParams.buffer);
+        break;
+    }
+
+    leaveCriticalSection(oldIME);
+
+    sendValue32(retval);
+}
+
 void runSdMmcEngineCheck (void)
 {
-	nocashMessage("runSdMmcEngineCheck");
+	//nocashMessage("runSdMmcEngineCheck");
 	if(*((vu32*)0x027FEE24) == (u32)0x027FEE04)
 	{
 		nocashMessage("sdmmc value received");
 		sdmmcCustomValueHandler(*((vu32*)0x027FEE28));
-	} 
+	} else if(*((vu32*)0x027FEE24) == (u32)0x027FEE05)
+	{
+		nocashMessage("sdmmc msg received");
+		sdmmcCustomMsgHandler(*((vu32*)0x027FEE28));
+	}
 }

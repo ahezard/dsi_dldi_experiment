@@ -33,11 +33,21 @@
 #include <nds/disc_io.h>
 #include <nds/debug.h>
 #include <nds/fifocommon.h>
+#include <nds/fifomessages.h>
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
 	*((vu32*)0x027FEE24) = (u32)0x027FEE04;
 	*((vu32*)0x027FEE28) = value32;
+}
+
+void sendMsg(int size, u8* msg) {
+	nocashMessage("sendMsg");
+	*((vu32*)0x027FEE24) = (u32)0x027FEE05;
+	*((vu32*)0x027FEE28) = size;
+	for(int i=0;i<size;i++)  {
+		*((u8*)0x027FEE32+i) = msg[i];
+	}	
 }
 
 void waitValue32() {
@@ -92,23 +102,25 @@ bool sd_IsInserted() {
 //---------------------------------------------------------------------------------
 bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 //---------------------------------------------------------------------------------
+	nocashMessage("sd_ReadSectors");
 	//if (!isSDAcessible()) return false;
-	/*FifoMessage msg;
+	FifoMessage msg;
 
-	DC_FlushRange(buffer,numSectors * 512);
+//	DC_FlushRange(buffer,numSectors * 512);
 
 	msg.type = SDMMC_SD_READ_SECTORS;
 	msg.sdParams.startsector = sector;
 	msg.sdParams.numsectors = numSectors;
 	msg.sdParams.buffer = buffer;
 	
-	fifoSendDatamsg(FIFO_SDMMCDSI, sizeof(msg), (u8*)&msg);
+	sendMsg(sizeof(msg), (u8*)&msg);
 
-	fifoWaitValue32(FIFO_SDMMCDSI);
+	waitValue32();
 
-	int result = fifoGetValue32(FIFO_SDMMCDSI);
+	int result = getValue32();
 	
-	return result == 0;*/
+	return result == 0;
+	
 	return false;
 }
 
