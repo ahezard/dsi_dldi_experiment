@@ -34,6 +34,7 @@
 #include <nds/debug.h>
 #include <nds/fifocommon.h>
 #include <nds/fifomessages.h>
+#include <nds/dma.h>
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
@@ -105,19 +106,23 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	nocashMessage("sd_ReadSectors");
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
+	
+	vu32* mybuffer = (vu32*)0x027FCE24;
 
-	DC_FlushRange(buffer,numSectors * 512);
+	DC_FlushRange(buffer,numSectors * 512);	
 
 	msg.type = SDMMC_SD_READ_SECTORS;
 	msg.sdParams.startsector = sector;
 	msg.sdParams.numsectors = numSectors;
-	msg.sdParams.buffer = buffer;
+	msg.sdParams.buffer = mybuffer;
 	
 	sendMsg(sizeof(msg), (u8*)&msg);
 
 	waitValue32();
 
 	int result = getValue32();
+	
+	dmaCopy(mybuffer, buffer, numSectors*512);
 	
 	return result == 0;
 	
