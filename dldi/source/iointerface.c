@@ -113,7 +113,7 @@ bool sd_ReadSectors(sec_t sector, sec_t numSectors,void* buffer) {
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 	
-	vu32* mybuffer = (vu32*)0x027FCE24;
+	vu32* mybuffer = (vu32*)0x027F0E24;
 
 	DC_FlushRange(buffer,numSectors * 512);	
 
@@ -142,7 +142,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 	//if (!isSDAcessible()) return false;
 	FifoMessage msg;
 	
-	vu32* mybuffer = (vu32*)0x027FCE24;
+	vu32* mybuffer = (vu32*)0x027F0E24;
 
 	DC_FlushRange(buffer,numSectors * 512);		
 	
