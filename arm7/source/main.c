@@ -28,13 +28,9 @@
 
 ---------------------------------------------------------------------------------*/
 #include <nds.h>
+#include <dswifi7.h>
+#include <maxmod7.h>
 #include "sdmmcEngine.h"
-
-//---------------------------------------------------------------------------------
-void VblankHandler(void) {
-//---------------------------------------------------------------------------------
-	//Wifi_Update();
-}
 
 
 //---------------------------------------------------------------------------------
@@ -43,6 +39,12 @@ void VcountHandler() {
 	inputGetAndSend();
 	runSdMmcEngineCheck();
 	
+}
+
+//---------------------------------------------------------------------------------
+void VblankHandler(void) {
+//---------------------------------------------------------------------------------
+	Wifi_Update();
 }
 
 volatile bool exitflag = false;
@@ -56,7 +58,6 @@ void powerButtonCB() {
 //---------------------------------------------------------------------------------
 int main() {
 //---------------------------------------------------------------------------------
-    nocashMessage("ARM7 main.c main");
 	// clear sound registers
 	dmaFillWords(0, (void*)0x04000400, 0x100);
 
@@ -72,14 +73,13 @@ int main() {
 	initClockIRQ();
 	fifoInit();
 
-	//mmInstall(FIFO_MAXMOD);
+	mmInstall(FIFO_MAXMOD);
 
 	SetYtrigger(80);
 
-	//installWifiFIFO();
+	installWifiFIFO();
 	installSoundFIFO();
 
-    nocashMessage("ARM7 main.c installSystemFIFO()");
 	installSystemFIFO();
 
 	irqSet(IRQ_VCOUNT, VcountHandler);
@@ -87,11 +87,13 @@ int main() {
 
 	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK);
 
-	setPowerButtonCB(powerButtonCB);	
-	
+	setPowerButtonCB(powerButtonCB);
 
 	// Keep the ARM7 mostly idle
-	while (1) {
+	while (!exitflag) {
+		if ( 0 == (REG_KEYINPUT & (KEY_SELECT | KEY_START | KEY_L | KEY_R))) {
+			exitflag = true;
+		}
 		swiWaitForVBlank();
 	}
 	return 0;
