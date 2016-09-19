@@ -35,11 +35,13 @@
 #include <nds/fifocommon.h>
 #include <nds/fifomessages.h>
 #include <nds/dma.h>
+#include <nds/ipc.h>
 
 void sendValue32(u32 value32) {
 	nocashMessage("sendValue32");
 	*((vu32*)0x027FEE24) = (u32)0x027FEE04;
 	*((vu32*)0x027FEE28) = value32;
+	IPC_SendSync(0xEE24);
 }
 
 void sendMsg(int size, u8* msg) {
@@ -49,6 +51,7 @@ void sendMsg(int size, u8* msg) {
 	for(int i=0;i<size;i++)  {
 		*((u8*)0x027FEE2C+i) = msg[i];
 	}	
+	IPC_SendSync(0xEE24);
 }
 
 void waitValue32() {
@@ -151,8 +154,7 @@ bool sd_WriteSectors(sec_t sector, sec_t numSectors,const void* buffer) {
 
 	waitValue32();
 
-	int result = getValue32();
-	
+	int result = getValue32();	
 	
 	return result == 0;
 	

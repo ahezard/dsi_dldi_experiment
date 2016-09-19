@@ -32,13 +32,17 @@
 #include <maxmod7.h>
 #include "sdmmcEngine.h"
 
+//---------------------------------------------------------------------------------
+void SyncHandler(void) {
+//---------------------------------------------------------------------------------
+	runSdMmcEngineCheck();
+}
 
 //---------------------------------------------------------------------------------
-void VcountHandler() {
+void VcountHandler(void) {
 //---------------------------------------------------------------------------------
 	inputGetAndSend();
 	runSdMmcEngineCheck();
-	
 }
 
 //---------------------------------------------------------------------------------
@@ -83,9 +87,12 @@ int main() {
 	installSystemFIFO();
 
 	irqSet(IRQ_VCOUNT, VcountHandler);
-	irqSet(IRQ_VBLANK, VblankHandler);
+	irqSet(IRQ_VBLANK, VblankHandler);	
+	irqSet(IRQ_IPC_SYNC, SyncHandler);
 
-	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK);
+	irqEnable( IRQ_VBLANK | IRQ_VCOUNT | IRQ_NETWORK | IRQ_IPC_SYNC);
+	
+	REG_IPC_SYNC|=IPC_SYNC_IRQ_ENABLE;
 
 	setPowerButtonCB(powerButtonCB);
 
