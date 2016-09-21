@@ -69,8 +69,6 @@ bool sd_Startup() {
 //---------------------------------------------------------------------------------
 	nocashMessage("sdio_Startup");
 	//if (!isSDAcessible()) return false;
-	
-	REG_SCFG_EXT &= 0xC000;
 
 	sendValue32(SDMMC_HAVE_SD);
 
